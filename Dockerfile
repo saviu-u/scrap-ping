@@ -2,11 +2,10 @@ FROM ruby:2.6.5
 RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
 
 RUN gem install bundler
-WORKDIR /myapp
-COPY Gemfile /myapp/Gemfile
-COPY Gemfile.lock /myapp/Gemfile.lock
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
 RUN bundle install
-COPY . /myapp
 
 
 # COPY entrypoint.sh /usr/bin/
