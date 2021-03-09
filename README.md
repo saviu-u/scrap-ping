@@ -1,24 +1,11 @@
-# README
+# Scrap Ping
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
 
-Things you may want to cover:
+**Premissa do projeto**
 
-* Ruby version
+------------
 
-* System dependencies
 
-* Configuration
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Scrap Ping é o projeto do **GRUPO 3** para a APS do primeiro semestre de 2021
+O objetivo do projeto é criar uma aplicação que possa fazer scrapping/web-crawlling em paginas da web
