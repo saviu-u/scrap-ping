@@ -1,0 +1,36 @@
+version: "2"
+services:
+  db:
+    image: postgres:12.1
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=scrap_ping
+      - POSTGRES_PASSWORD=scrap_pingpassword
+      - POSTGRES_DB=scrapping
+      - TZ=America/Sao_Paulo
+
+  web:
+    tty: true # Enables debugging capabilities when attached to this container.
+    build: .
+    restart: unless-stopped
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_NAME=scrapping
+      - DATABASE_USER=scrap_ping
+      - DATABASE_PASSWORD=scrap_pingpassword
+      - SPROCKETS_CACHE=/cache
+      - RUN_CRON=true
+    volumes:
+      - .:/app
+      - cache:/cache
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+
+volumes:
+  # bundle:
+  # db:
+  cache:
