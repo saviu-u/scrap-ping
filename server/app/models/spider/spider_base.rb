@@ -2,8 +2,10 @@ require 'open-uri'
 
 module Spider
   class SpiderBase
-    def document(path: nil)
-      @document ||= Nokogiri::HTML(URI.open(host + path.to_s, default_headers))
+    attr_accessor :category
+
+    def get_document(path: nil)
+      @get_document ||= Nokogiri::HTML(URI.open(host + path.to_s, default_headers))
     end
 
     private

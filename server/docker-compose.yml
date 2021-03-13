@@ -15,6 +15,7 @@ services:
     tty: true # Enables debugging capabilities when attached to this container.
     build: .
     restart: unless-stopped
+    command: sh /app/scripts/entrypoint.sh
     environment:
       - DATABASE_HOST=db
       - DATABASE_NAME=scrapping
