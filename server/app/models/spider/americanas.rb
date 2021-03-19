@@ -9,19 +9,44 @@ module Spider
     def to_a
       utilit_set = uri_config[:search]
       document = get_document(path: utilit_set[:path] + category)
-      result = document.css(utilit_set[:css_query][:product]).each_with_object([]) do |noko, memo|
+      results = document.css(utilit_set[:css_query][:product]).each_with_object([]) do |noko, memo|
         begin
-          memo << utilit_set[:lambda_dict].dup.transform_values { |result_proc| result_proc.call(noko) }
+          result = utilit_set[:lambda_dict].dup.transform_values { |result_proc| result_proc.call(noko) }
+          result.merge!(category: category)
+          memo << result
         rescue StandardError => e
           raise e unless e.to_s == NO_PRICE_EXCEPTION
         end
       end
+
+      # error = results
+      # results = []
+
+      # 5.times do |index|
+      #   error = error.each_with_object([]) do |result, memo|
+      #     begin
+      #       sleep(rand(1..3))
+      #       results << result.merge!(instance_hash(result[:id]))
+      #     rescue OpenURI::HTTPError
+      #       puts "error #{result[:id]} #{index}"
+      #       memo << result
+      #       sleep(rand(5..7))
+      #     rescue StandardError => e
+      #       raise e unless e.to_s == NO_PRICE_EXCEPTION
+      #     end
+      #   end
+
+      #   puts "loop number #{index} done"
+      # end
+
+      # results
     end
 
     # private
 
     def instance_hash(id)
       utilit_set = uri_config[:show]
+      puts utilit_set[:path] + id.to_s
       document = get_document(path: utilit_set[:path] + id.to_s)
 
       utilit_set[:lambda_dict].transform_values { |key_proc| key_proc.call(document) }
@@ -34,19 +59,19 @@ module Spider
         search: {
           path: 'busca/',
           lambda_dict: {
-            id: lambda do |noko|
-              noko.at_css(uri_config[:search][:css_query][:id]).attributes['to'].value
+            integration_id: lambda do |noko|
+              noko.at_css(uri_config[:search][:css_query][:integration_id]).attributes['to'].value
                   .remove('/produto').split('?').first[1..-1]
             end,
-            name: ->(noko) { noko.at_css(uri_config[:search][:css_query][:name]).text },
+            title: ->(noko) { noko.at_css(uri_config[:search][:css_query][:title]).text },
             price: lambda do |noko|
               money_to_float(noko.at_css(uri_config[:search][:css_query][:price])&.text)
             end
           },
           css_query: {
             product: 'div [@class^="col__StyledCol-sc-1snw5v3-0 epVkvq"]',
-            id: 'a',
-            name: 'span[@class*="src__Name"]',
+            integration_id: 'a',
+            title: 'span[@class*="src__Name"]',
             price: 'span[@class*="src__PromotionalPrice"]'
           }
         },
@@ -80,7 +105,7 @@ module Spider
     end
 
     def money_to_float(money)
-      money.remove('R$')&.tr('.,', ' .')&.delete(' ')&.to_f || raise(NO_PRICE_EXCEPTION)
+      money&.remove('R$')&.tr('.,', ' .')&.delete(' ')&.to_f || raise(NO_PRICE_EXCEPTION)
     end
 
     def host

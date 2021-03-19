@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_13_000823) do
+ActiveRecord::Schema.define(version: 2021_03_17_000038) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,21 @@ ActiveRecord::Schema.define(version: 2021_03_13_000823) do
     t.index ["slug"], name: "index_categories_on_slug"
   end
 
+  create_table "delayed_jobs", force: :cascade do |t|
+    t.integer "priority", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.text "handler", null: false
+    t.text "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string "locked_by"
+    t.string "queue"
+    t.datetime "created_at", precision: 6
+    t.datetime "updated_at", precision: 6
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
+  end
+
   create_table "prices", force: :cascade do |t|
     t.float "price"
     t.float "discount"
@@ -33,6 +48,16 @@ ActiveRecord::Schema.define(version: 2021_03_13_000823) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["product_id"], name: "index_prices_on_product_id"
     t.index ["shop_id"], name: "index_prices_on_shop_id"
+  end
+
+  create_table "product_tags", force: :cascade do |t|
+    t.bigint "product_id"
+    t.bigint "tag_id"
+    t.string "value"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["product_id"], name: "index_product_tags_on_product_id"
+    t.index ["tag_id"], name: "index_product_tags_on_tag_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -55,6 +80,14 @@ ActiveRecord::Schema.define(version: 2021_03_13_000823) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["slug"], name: "index_shops_on_slug"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "title"
+    t.bigint "tag_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["tag_id"], name: "index_tags_on_tag_id"
   end
 
 end

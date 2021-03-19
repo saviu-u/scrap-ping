@@ -13,6 +13,12 @@ if [ -z "${ENVIRONMENT}" ]; then
     rm -f /app/tmp/pids/server.pid
     rm -rf /app/tmp/cache/assets/sprockets/
 
+    echo "> Add Permission to delayed_job"
+    chmod +xr bin/delayed_job
+
+    echo "> Start jobs"
+    RAILS_ENV=development bin/delayed_job start
+
     echo "> Caching"
     bundle exec rake cache:fetch
 
