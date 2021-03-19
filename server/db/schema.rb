@@ -41,6 +41,7 @@ ActiveRecord::Schema.define(version: 2021_03_17_000038) do
   create_table "prices", force: :cascade do |t|
     t.float "price"
     t.float "discount"
+    t.boolean "active"
     t.string "id_integration"
     t.bigint "shop_id"
     t.bigint "product_id"
