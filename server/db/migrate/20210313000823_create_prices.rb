@@ -4,6 +4,8 @@ class CreatePrices < ActiveRecord::Migration[6.1]
       t.float :price
       t.float :discount
 
+      t.boolean :active
+
       t.string :id_integration
 
       t.references :shop
