@@ -19,27 +19,27 @@ module Spider
         end
       end
 
-      # error = results
-      # results = []
+      error = results
+      results = []
 
-      # 5.times do |index|
-      #   error = error.each_with_object([]) do |result, memo|
-      #     begin
-      #       sleep(rand(1..3))
-      #       results << result.merge!(instance_hash(result[:id]))
-      #     rescue OpenURI::HTTPError
-      #       puts "error #{result[:id]} #{index}"
-      #       memo << result
-      #       sleep(rand(5..7))
-      #     rescue StandardError => e
-      #       raise e unless e.to_s == NO_PRICE_EXCEPTION
-      #     end
-      #   end
+      5.times do |index|
+        error = error.each_with_object([]) do |result, memo|
+          begin
+            sleep(rand(1..3))
+            results << result.merge!(instance_hash(result[:integration_id]))
+          rescue OpenURI::HTTPError
+            puts "error #{result[:id]} #{index}"
+            memo << result
+            sleep(rand(5..7))
+          rescue StandardError => e
+            raise e unless e.to_s == NO_PRICE_EXCEPTION
+          end
+        end
 
-      #   puts "loop number #{index} done"
-      # end
+        puts "loop number #{index} done"
+      end
 
-      # results
+      results
     end
 
     # private

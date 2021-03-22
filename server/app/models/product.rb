@@ -6,41 +6,40 @@ class Product < ApplicationRecord
   has_many :prices
   has_many :shops, through: :prices
 
-  has_many :product_tags
+  has_many :product_tags, dependent: :delete_all
   # has_many :
 
-  accepts_nested_attributes_for :tags
-  accepts_nested_attributes_for :product_tags
-
-  before_validation :fetch_data
+  # accepts_nested_attributes_for :tags
+  accepts_nested_attributes_for :product_tags, allow_destroy: true
 
   validates_presence_of :title, :ean, :category
-
-  after_validation :retrieve_category
+  validates_uniqueness_of :ean
+  # after_validation :retrieve_category
 
   def fetch_data(data, spider)
     # Set variables
-    self.category = Category.find_or_create_by(title: data.slice(:category))
-    id = data[:id_integration]
+    self.category = Category.find_or_create_by(title: data.delete(:category))
+    id = data[:integration_id]
 
     # Retrieve more data
     data.merge!(spider.instance_hash(id)) if id.present?
 
-    # Assigning existing attributes
-    assign_attributes(data.slice(*attributes.keys.map(&:to_sym)))
-
     # Creating tags
     assigned_tags = product_tags.includes(:tag)
+    tags = Tag.all
     data_tag = data.delete(:tags).map do |key, value|
       product_tag = assigned_tags.find { |pt| pt.tag.title == key }
+      tag = tags.find { |model| model.title == key }
       {
-        id: product_tag&.id,
-        value: value,
-        tag_attribute: {
-          id: product_tag&.tag&.id,
-          title: key
-        }
+        id: product_tag&.id, value: value,
+        **(tag ? {tag: tag} : {tag_attributes: { id: tag&.id, title: key }})
       }
     end
+
+    # Assigning existing attributes
+    assign_attributes(data.slice(*attributes.keys.map(&:to_sym)))
+    assign_attributes(product_tags_attributes: data_tag)
+
+    self
   end
 end

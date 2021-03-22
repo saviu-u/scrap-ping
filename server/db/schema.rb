@@ -66,10 +66,10 @@ ActiveRecord::Schema.define(version: 2021_03_17_000038) do
     t.string "title"
     t.string "ean"
     t.string "image_path"
-    t.bigint "categories_id"
+    t.bigint "category_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["categories_id"], name: "index_products_on_categories_id"
+    t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["slug"], name: "index_products_on_slug"
   end
 

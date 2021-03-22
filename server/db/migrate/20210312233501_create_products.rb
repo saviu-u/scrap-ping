@@ -6,7 +6,7 @@ class CreateProducts < ActiveRecord::Migration[6.1]
       t.string :ean
       t.string :image_path
 
-      t.references :categories
+      t.references :category
 
       t.timestamps
     end
