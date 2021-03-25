@@ -2,14 +2,12 @@ require 'nokogiri'
 
 module Spider
   class Americanas < Spider::SpiderBase
-    NO_PRICE_EXCEPTION = 'NO_PRICE_EXCEPTION'
-
     # Americanas's page only support 24 items per page, more it has to be on API
 
     def to_a
       utilit_set = uri_config[:search]
       document = get_document(path: utilit_set[:path] + category)
-      results = document.css(utilit_set[:css_query][:product]).each_with_object([]) do |noko, memo|
+      document.css(utilit_set[:css_query][:product]).each_with_object([]) do |noko, memo|
         begin
           result = utilit_set[:lambda_dict].dup.transform_values { |result_proc| result_proc.call(noko) }
           result.merge!(category: category)
@@ -18,28 +16,6 @@ module Spider
           raise e unless e.to_s == NO_PRICE_EXCEPTION
         end
       end
-
-      error = results
-      results = []
-
-      5.times do |index|
-        error = error.each_with_object([]) do |result, memo|
-          begin
-            sleep(rand(1..3))
-            results << result.merge!(instance_hash(result[:integration_id]))
-          rescue OpenURI::HTTPError
-            puts "error #{result[:id]} #{index}"
-            memo << result
-            sleep(rand(5..7))
-          rescue StandardError => e
-            raise e unless e.to_s == NO_PRICE_EXCEPTION
-          end
-        end
-
-        puts "loop number #{index} done"
-      end
-
-      results
     end
 
     # private
@@ -90,8 +66,6 @@ module Spider
               list = noko.at_css(uri_config[:show][:css_query][:tags]).children.children
               list.each_with_object({}) do |tag, memo|
                 set = tag.children.map(&:text)
-                next if set.first == 'Código'
-
                 memo[set.first] = set.second
               end
             end
@@ -102,10 +76,6 @@ module Spider
           }
         }
       }
-    end
-
-    def money_to_float(money)
-      money&.remove('R$')&.tr('.,', ' .')&.delete(' ')&.to_f || raise(NO_PRICE_EXCEPTION)
     end
 
     def host

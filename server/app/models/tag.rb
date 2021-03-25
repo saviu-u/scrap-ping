@@ -1,15 +1,29 @@
 class Tag < ApplicationRecord
   has_many :product_tags
   has_many :products, through: :product_tags
-  belongs_to :tag, optional: true
+  has_many :product_tags
+  belongs_to :sub_tag, optional: true, foreign_key: :sub_tag_id, class_name: 'Tag'
 
   validates_presence_of :title
   validates_uniqueness_of :title
 
   scope :supertags, lambda {
-    select_clause = Tag.column_names.map { |atr| "COALESCE(tag2.#{atr}, tag1.#{atr}) #{atr}" }
+    select_clause = Tag.column_names.map { |atr| "COALESCE(tag2.#{atr}, tags.#{atr}) #{atr}" }
 
-    select(select_clause.join(', ')).from('tags tag1')
-                                    .joins('LEFT OUTER JOIN tags tag2 ON tag1.tag_id = tag2.id')
+    select(select_clause.join(', ')).joins('LEFT OUTER JOIN tags tag2 ON tags.tag_id = tag2.id')
   }
+
+  def fixing_tags
+    update_to_sub_tag(self)
+  end
+
+  def self.fixing_tags
+    Tags.includes(:product_tags).map(&method(:update_to_sub_tag)).all?(true)
+  end
+
+  private
+
+  def update_to_sub_tag(tag)
+    tag.product_tags.update_all(tag_id: tag.sub_tag&.id) if tag.sub_tag
+  end
 end

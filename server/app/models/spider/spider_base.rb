@@ -4,12 +4,24 @@ module Spider
   class SpiderBase
     attr_accessor :category
 
+    NO_PRICE_EXCEPTION = 'NO_PRICE_EXCEPTION'
+
     def initialize(product = nil)
       self.category = product
     end
 
     def get_document(path: nil)
       Nokogiri::HTML(URI.open(host + path.to_s, default_headers))
+    end
+
+    def import
+      to_a.each do |result|
+        FetchProductJob.perform_later(result, self.class)
+      end
+    end
+
+    def model
+      Shop.find_by(spider_name: self.class.to_s)
     end
 
     private
@@ -26,13 +38,10 @@ module Spider
       raise 'Define the method \'to_a\' first'
     end
 
-    def import
-      to_a.each do |result_hash|
-        product = Product.find_by(result_hash.slice(:title, :ean, :image_path))
-        product = if product.nil?
-          # Product.create!(title: )
-        end
-      end
+    # Tools
+
+    def money_to_float(money)
+      money&.remove('R$')&.tr('.,', ' .')&.delete(' ')&.to_f || raise(NO_PRICE_EXCEPTION)
     end
   end
 end
