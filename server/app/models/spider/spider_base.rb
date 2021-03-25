@@ -27,7 +27,12 @@ module Spider
     private
 
     def default_headers
-      { 'User-Agent' => 'Chrome/88.0.4324.190' }
+      {
+        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36',
+        'accept' => 'text/html',
+        'sec-ch-ua' => '"Google Chrome";v="89", "Chromium";v="89", ";Not A Brand";v="99"',
+        'upgrade-insecure-requests' => '1'
+      }
     end
 
     def host
