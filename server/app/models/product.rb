@@ -27,7 +27,7 @@ class Product < ApplicationRecord
     work_data.merge!(spider.instance_hash(show_id[:id])) if show_id[:id] && !show_id[:ean]
 
     # Finding product
-    show_id[:ean] = work_data[:ean]
+    show_id[:ean] = work_data[:ean].match(/\d+/).to_a[0]
     if !id && (existing = Product.find_by(ean: show_id[:ean])&.id)
       FetchProductJob.perform_now(work_data, spider.class, existing)
       return nil
@@ -44,10 +44,8 @@ class Product < ApplicationRecord
       }
     ]
 
-
-    # puts '*' * 100, work_data[:tags], '#' * 100, new_tag_attributes(work_data.delete(:tags))
     # Assigning existing attributes
-    assign_attributes(work_data.slice(*attributes.keys.map(&:to_sym)))
+    assign_attributes(work_data.slice(*empty_attrs))
     assign_attributes(product_tags_attributes: new_tag_attributes(work_data.delete(:tags)))
     assign_attributes(prices_attributes: price_attr)
 
@@ -64,15 +62,22 @@ class Product < ApplicationRecord
       product_tag = assigned_tags.find { |pt| pt.tag.title == key }
 
       tag = tags.find { |model| model.title == key }
-      puts '1' * 100, tag&.inspect
       tag = tag&.sub_tag || tag
-
-      puts '2' * 100, tag&.inspect
 
       {
         id: product_tag&.id, value: value,
         **(tag ? { tag: tag } : { tag_attributes: { id: tag&.id, title: key } })
       }
     end
+  end
+
+  def price_update
+    Shop.all.each { |shop| shop.spider.new(ean, category_title: category&.title).import }
+  end
+
+  private
+
+  def empty_attrs
+    attributes.reject { |_key, value| value.present? }.keys.map(&:to_sym)
   end
 end

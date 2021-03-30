@@ -1,30 +1,30 @@
 module Spider
-  class Americanas < Spider::SpiderBase
+  class Amazon < Spider::SpiderBase
     def uri_config
       {
         category: {
-          path: 'categoria/',
+          path: 'gp/most-wished-for/',
           lambda_dict: {
             integration_id: lambda do |noko|
               id_polish(noko.at_css(uri_config[:category][:css_query][:integration_id]).attributes['href'].value)
             end,
-            title: ->(noko) { noko.at_css(uri_config[:category][:css_query][:title]).text },
+            title: ->(noko) { noko.at_css(uri_config[:category][:css_query][:title]).text.strip },
             price: lambda do |noko|
               money_to_float(noko.at_css(uri_config[:category][:css_query][:price])&.text)
             end
           },
           css_query: {
-            product: 'div[class^="product-grid-item ProductGrid__GridColumn"]',
-            integration_id: 'a[class^="Link"]',
-            title: 'h2[class^="TitleUI"]',
-            price: 'span[class^="PriceUI"]'
+            product: 'li[role="gridcell"]',
+            integration_id: 'a[class^="a-link-normal"]',
+            title: 'div[class^="p13n-sc-trunc"]',
+            price: 'span[class^="p13n-sc-price"]'
           }
         },
         search: {
-          path: 'busca/',
+          path: 's?k=',
           lambda_dict: {
             integration_id: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:search][:css_query][:integration_id]).attributes['to'].value)
+              id_polish(noko.at_css(uri_config[:search][:css_query][:integration_id]).attributes['href'].value)
             end,
             title: ->(noko) { noko.at_css(uri_config[:search][:css_query][:title]).text },
             price: lambda do |noko|
@@ -32,34 +32,34 @@ module Spider
             end
           },
           css_query: {
-            product: 'div [@class^="col__StyledCol-sc-1snw5v3-0 epVkvq"]',
-            integration_id: 'a',
-            title: 'span[@class*="src__Name"]',
-            price: 'span[@class*="src__PromotionalPrice"]'
+            product: 'div[data-component-type^="s-search-result"]',
+            integration_id: 'a[class="a-link-normal a-text-normal"]',
+            title: 'span[class="a-size-base-plus a-color-base a-text-normal"]',
+            price: 'span[class="a-price-whole"]'
           }
         },
         show: {
-          path: 'produto/',
+          path: 'dp/',
           lambda_dict: {
             price: lambda do |noko|
               money_to_float(noko.at_css(uri_config[:show][:css_query][:price])&.text)
             end,
             ean: lambda do |noko|
-              noko.at_css(uri_config[:show][:css_query][:tags]).children.children.find do |tag|
-                tag.children.first.text == 'Código de barras'
-              end.children.last.text.match(/\d+/).to_a[0]
+              noko.at_css(uri_config[:show][:css_query][:tags]).css('tr').find do |tag|
+                tag.children.children.first.text.strip == 'EAN'
+              end.children.children.last.text.strip
             end,
             tags: lambda do |noko|
-              list = noko.at_css(uri_config[:show][:css_query][:tags]).children.children
+              list = noko.at_css(uri_config[:show][:css_query][:tags]).css('tr')
               list.each_with_object({}) do |tag, memo|
-                set = tag.children.map(&:text)
+                set = tag.children.children.map(&:text).map(&:strip)
                 memo[set.first] = set.second
               end
             end
           },
           css_query: {
-            price: 'div[class^="src__BestPrice-sc-1jvw02c-5"]',
-            tags: 'table[class^="src__SpecsCell"]'
+            price: 'span[class^="a-size-base a-color-price"]',
+            tags: 'table[id^="productDetails_techSpec_section"]'
           }
         }
       }
@@ -67,18 +67,18 @@ module Spider
 
     def category_hash
       {
-        'tv' => 'tv-e-home-theater/tv'
+        'tv' => 'electronics/16243822011'
       }
     end
 
     def host
-      'https://www.americanas.com.br/'
+      'https://www.amazon.com.br/'
     end
 
-    private #Americanas helpers
+    private
 
     def id_polish(id)
-      id.remove('/produto').split('?').first[1..-1]
+      id.split('dp').second[1..10]
     end
   end
 end
