@@ -5,8 +5,8 @@ module Spider
         category: {
           path: 'gp/most-wished-for/',
           lambda_dict: {
-            integration_id: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:category][:css_query][:integration_id]).attributes['href'].value)
+            id_integration: lambda do |noko|
+              id_polish(noko.at_css(uri_config[:category][:css_query][:id_integration]).attributes['href'].value)
             end,
             title: ->(noko) { noko.at_css(uri_config[:category][:css_query][:title]).text.strip },
             price: lambda do |noko|
@@ -15,7 +15,7 @@ module Spider
           },
           css_query: {
             product: 'li[role="gridcell"]',
-            integration_id: 'a[class^="a-link-normal"]',
+            id_integration: 'a[class^="a-link-normal"]',
             title: 'div[class^="p13n-sc-trunc"]',
             price: 'span[class^="p13n-sc-price"]'
           }
@@ -23,8 +23,8 @@ module Spider
         search: {
           path: 's?k=',
           lambda_dict: {
-            integration_id: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:search][:css_query][:integration_id]).attributes['href'].value)
+            id_integration: lambda do |noko|
+              id_polish(noko.at_css(uri_config[:search][:css_query][:id_integration]).attributes['href'].value)
             end,
             title: ->(noko) { noko.at_css(uri_config[:search][:css_query][:title]).text },
             price: lambda do |noko|
@@ -33,7 +33,7 @@ module Spider
           },
           css_query: {
             product: 'div[data-component-type^="s-search-result"]',
-            integration_id: 'a[class="a-link-normal a-text-normal"]',
+            id_integration: 'a[class="a-link-normal a-text-normal"]',
             title: 'span[class="a-size-base-plus a-color-base a-text-normal"]',
             price: 'span[class="a-price-whole"]'
           }
@@ -79,6 +79,14 @@ module Spider
 
     def id_polish(id)
       id.split('dp').second[1..10]
+    end
+
+    def default_headers
+      {
+        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36',
+        'accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'upgrade-insecure-requests' => '1'
+      }
     end
   end
 end

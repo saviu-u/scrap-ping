@@ -8,4 +8,8 @@ class Shop < ApplicationRecord
   def spider
     spider_name.constantize
   end
+
+  def search_item item
+    spider.new(item).import
+  end
 end

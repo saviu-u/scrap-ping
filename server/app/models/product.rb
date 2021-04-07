@@ -21,10 +21,11 @@ class Product < ApplicationRecord
     # Set variables
     work_data = data.dup
     self.category = Category.find_or_create_by(title: work_data.delete(:category) || category&.title)
-    (show_id = {})[:id] = work_data[:integration_id]
+    (show_id = {})[:id] = work_data[:id_integration]
 
     # Retrieve more data
     work_data.merge!(spider.instance_hash(show_id[:id])) if show_id[:id] && !show_id[:ean]
+    work_data[:ean] = work_data[:ean]&.match(/\d+/).to_a[0]
 
     # Finding product
     show_id[:ean] = work_data[:ean].match(/\d+/).to_a[0]

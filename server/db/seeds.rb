@@ -14,6 +14,10 @@ existing_shops = Shop.pluck(:spider_name).map { |class_name| class_name.demoduli
   Shop.create!(title: spider.to_s.demodulize, spider_name: spider.to_s, image_path: 'undefined')
 end
 
+if Delayed::Job.count.zero?
+  Shop.all.each { |shop| shop.spider.new('tv').import }
+end
+
 # last_price = Price.all.min(&:updated_at)
 # if last_price.nil? || ((last_price.updated_at + 30.minutes) > Time.zone.now)
   

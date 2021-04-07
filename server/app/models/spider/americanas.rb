@@ -5,8 +5,8 @@ module Spider
         category: {
           path: 'categoria/',
           lambda_dict: {
-            integration_id: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:category][:css_query][:integration_id]).attributes['href'].value)
+            id_integration: lambda do |noko|
+              id_polish(noko.at_css(uri_config[:category][:css_query][:id_integration]).attributes['href'].value)
             end,
             title: ->(noko) { noko.at_css(uri_config[:category][:css_query][:title]).text },
             price: lambda do |noko|
@@ -15,7 +15,7 @@ module Spider
           },
           css_query: {
             product: 'div[class^="product-grid-item ProductGrid__GridColumn"]',
-            integration_id: 'a[class^="Link"]',
+            id_integration: 'a[class^="Link"]',
             title: 'h2[class^="TitleUI"]',
             price: 'span[class^="PriceUI"]'
           }
@@ -23,8 +23,8 @@ module Spider
         search: {
           path: 'busca/',
           lambda_dict: {
-            integration_id: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:search][:css_query][:integration_id]).attributes['to'].value)
+            id_integration: lambda do |noko|
+              id_polish(noko.at_css(uri_config[:search][:css_query][:id_integration]).attributes['to'].value)
             end,
             title: ->(noko) { noko.at_css(uri_config[:search][:css_query][:title]).text },
             price: lambda do |noko|
@@ -33,7 +33,7 @@ module Spider
           },
           css_query: {
             product: 'div [@class^="col__StyledCol-sc-1snw5v3-0 epVkvq"]',
-            integration_id: 'a',
+            id_integration: 'a',
             title: 'span[@class*="src__Name"]',
             price: 'span[@class*="src__PromotionalPrice"]'
           }
