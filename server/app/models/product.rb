@@ -17,30 +17,48 @@ class Product < ApplicationRecord
   validates_uniqueness_of :ean
   # after_validation :retrieve_category
 
+  after_commit :search_shops
+
+  def to_show
+    best_price = prices.select(&:active).min_by(&:price)
+    {
+      id: slug,
+      title: title,
+      best_price: best_price&.price,
+      best_price_shop: best_price&.shop&.to_show,
+      best_price_link: best_price&.link
+    }
+  end
+
   def fetch_data(data, spider)
     # Set variables
     work_data = data.dup
     self.category = Category.find_or_create_by(title: work_data.delete(:category) || category&.title)
-    (show_id = {})[:id] = work_data[:id_integration]
 
     # Retrieve more data
-    work_data.merge!(spider.instance_hash(show_id[:id])) if show_id[:id] && !show_id[:ean]
+    work_data.merge!(spider.instance_hash(work_data[:id_integration])) if work_data[:id_integration] && !work_data[:ean]
+    return unless work_data[:ean]
+
     work_data[:ean] = work_data[:ean]&.match(/\d+/).to_a[0]
 
     # Finding product
-    show_id[:ean] = work_data[:ean].match(/\d+/).to_a[0]
-    if !id && (existing = Product.find_by(ean: show_id[:ean])&.id)
+    if !id && existing = Product.find_by(ean: work_data[:ean])&.id
       FetchProductJob.perform_now(work_data, spider.class, existing)
       return nil
     end
 
     # Finding price
-    price = prices.find_by(id_integration: work_data[:id_integration]) || Price.new
+    price = prices.find_by(shop: spider.model) || Price.new
+
+    return if price.persisted? && price.id_integration != work_data[:id_integration]
+
     price_attr = [
       {
         id: price.id,
+        active: !work_data[:price].zero?,
         price: work_data.delete(:price),
         id_integration: work_data.delete(:id_integration),
+        link: work_data.delete(:link),
         shop: spider.model
       }
     ]
@@ -51,6 +69,8 @@ class Product < ApplicationRecord
     assign_attributes(prices_attributes: price_attr)
 
     self
+  rescue StandardError => e
+    raise e unless e == 'TO_DESTROY'
   end
 
   def new_tag_attributes(data)
@@ -72,8 +92,10 @@ class Product < ApplicationRecord
     end
   end
 
-  def price_update
-    Shop.all.each { |shop| shop.spider.new(ean, category_title: category&.title).import }
+  def search_shops
+    Shop.where.not(id: prices.map(&:shop).map(&:id)).each do |shop|
+      shop.spider.new(ean, category_title: category&.title).import
+    end
   end
 
   private

@@ -6,7 +6,7 @@ class Price < ApplicationRecord
     @spider_class ||= "Spider::#{spider_name}".constantize
   end
 
-  def update_info
-    # spider_class.
+  def price_update
+    shop.spider.new.update(id_integration, self)
   end
 end

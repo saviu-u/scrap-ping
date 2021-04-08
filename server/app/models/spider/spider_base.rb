@@ -5,7 +5,7 @@ module Spider
   class SpiderBase
     attr_accessor :category, :search, :category_title
 
-    NO_PRICE_EXCEPTION = 'NO_PRICE_EXCEPTION'
+    NO_PRICE_EXCEPTION = 'NO_PRICE_EXCEPTION'.freeze
 
     def initialize(product = nil, category_title: nil)
       self.search = product
@@ -14,8 +14,12 @@ module Spider
     end
 
     def get_document(path: nil)
+      Nokogiri::HTML(URI.open(get_link(path: path), default_headers))
+    end
+
+    def get_link(path: nil)
       puts '*' * 100, host + path.to_s
-      Nokogiri::HTML(URI.open(host + path.to_s, default_headers))
+      host + path.to_s
     end
 
     def import
@@ -49,12 +53,19 @@ module Spider
       uri_config[search_type].to_h[:path] + search_object
     end
 
+    def update(id, price)
+      result = instance_hash(id).merge(price.attributes.slice('id_integration'))
+      FetchProductJob.perform_later(result, self.class, price.product.id)
+    end
+
     def instance_hash(id)
       utilit_set = uri_config[:show]
-      puts utilit_set[:path] + id.to_s
-      document = get_document(path: utilit_set[:path] + id.to_s)
+      sub_link = utilit_set[:path] + id.to_s
+      puts sub_link
+      document = get_document(path: sub_link)
 
-      utilit_set[:lambda_dict].transform_values { |key_proc| key_proc.call(document) }
+      result = utilit_set[:lambda_dict].transform_values { |key_proc| key_proc.call(document) }
+      result.merge(link: get_link(path: sub_link))
     end
 
     private

@@ -41,8 +41,9 @@ ActiveRecord::Schema.define(version: 2021_03_17_000038) do
   create_table "prices", force: :cascade do |t|
     t.float "price"
     t.float "discount"
-    t.boolean "active"
+    t.boolean "active", default: true
     t.string "id_integration"
+    t.string "link"
     t.bigint "shop_id"
     t.bigint "product_id"
     t.datetime "created_at", precision: 6, null: false
@@ -78,6 +79,7 @@ ActiveRecord::Schema.define(version: 2021_03_17_000038) do
     t.string "title"
     t.string "image_path"
     t.string "spider_name"
+    t.string "link"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["slug"], name: "index_shops_on_slug"

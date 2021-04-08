@@ -42,7 +42,9 @@ module Spider
           path: 'dp/',
           lambda_dict: {
             price: lambda do |noko|
-              money_to_float(noko.at_css(uri_config[:show][:css_query][:price])&.text)
+              price = noko.at_css(uri_config[:show][:css_query][:price])&.text.strip
+              price = noko.at_css(uri_config[:show][:css_query][:price_medium])&.text if price.blank?
+              money_to_float(price)
             end,
             ean: lambda do |noko|
               noko.at_css(uri_config[:show][:css_query][:tags]).css('tr').find do |tag|
@@ -59,6 +61,7 @@ module Spider
           },
           css_query: {
             price: 'span[class^="a-size-base a-color-price"]',
+            price_medium: 'span[class^="a-size-medium a-color-price"]',
             tags: 'table[id^="productDetails_techSpec_section"]'
           }
         }

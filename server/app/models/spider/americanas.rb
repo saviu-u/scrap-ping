@@ -47,7 +47,7 @@ module Spider
             ean: lambda do |noko|
               noko.at_css(uri_config[:show][:css_query][:tags]).children.children.find do |tag|
                 tag.children.first.text == 'Código de barras'
-              end.children.last.text.match(/\d+/).to_a[0]
+              end&.children&.last&.text&.match(/\d+/)&.to_a&.first
             end,
             tags: lambda do |noko|
               list = noko.at_css(uri_config[:show][:css_query][:tags]).children.children

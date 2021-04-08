@@ -5,6 +5,7 @@ class CreateShops < ActiveRecord::Migration[6.1]
       t.string :title
       t.string :image_path
       t.string :spider_name
+      t.string :link
 
       t.timestamps
     end
