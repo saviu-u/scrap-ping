@@ -66,6 +66,8 @@ module Spider
 
       result = utilit_set[:lambda_dict].transform_values { |key_proc| key_proc.call(document) }
       result.merge(link: get_link(path: sub_link))
+    rescue StandardError => e
+      raise e unless e.to_s == NO_PRICE_EXCEPTION
     end
 
     private

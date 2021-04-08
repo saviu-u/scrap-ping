@@ -42,7 +42,7 @@ module Spider
           path: 'dp/',
           lambda_dict: {
             price: lambda do |noko|
-              price = noko.at_css(uri_config[:show][:css_query][:price])&.text.strip
+              price = noko.at_css(uri_config[:show][:css_query][:price])&.text&.strip
               price = noko.at_css(uri_config[:show][:css_query][:price_medium])&.text if price.blank?
               money_to_float(price)
             end,
