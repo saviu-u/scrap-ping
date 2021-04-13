@@ -86,10 +86,12 @@ ActiveRecord::Schema.define(version: 2021_03_17_000038) do
   end
 
   create_table "tags", force: :cascade do |t|
+    t.string "slug"
     t.string "title"
     t.bigint "sub_tag_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["slug"], name: "index_tags_on_slug"
     t.index ["sub_tag_id"], name: "index_tags_on_sub_tag_id"
   end
 

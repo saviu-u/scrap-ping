@@ -19,6 +19,36 @@ class Product < ApplicationRecord
 
   after_commit :search_shops
 
+  scope :for_search, lambda { |term, tag_search = nil|
+    # Standard search
+    result = joins(:category, :prices, product_tags: :tag)
+    .where('concat(products.title, categories.title) ILIKE ?', "%#{term}%")
+    .where(prices: { active: true }).distinct
+
+    return result unless tag_search&.present?
+
+    # Tag search
+    tag_search.to_h.inject(none) do |memo, (key, value)|
+      memo.or(
+        result.where(product_tags: { value: value.map{ |v| v.gsub('+', ' ') }, tags: { slug: key }})
+      )
+    end
+  }
+
+  scope :fancy_tags, lambda {
+    resource = includes(product_tags: :tag).joins(product_tags: :tag).where.not(tags: { slug: Tag::TAGS_BLACKLIST })
+
+    tag_set = resource.each_with_object({}) do |product, memo|
+      product.product_tags.each { |pt| (memo[pt.tag] ||= Set.new) << pt.value }
+    end
+    tag_set = tag_set.map { |key, value| { **key.to_search, values: value.to_a.sort } }
+    tag_set.sort_by { |result| -result[:values].length }.first(5)
+  }
+
+  scope :price_range, -> {
+    joins(:prices).where(prices: { active: true }).pluck('min(prices.price), max(prices.price)')
+  }
+
   def to_show
     best_price = prices.select(&:active).min_by(&:price)
     {

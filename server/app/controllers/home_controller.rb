@@ -1,12 +1,15 @@
 class HomeController < ApplicationController
   def index
-    response = {
-      products: products,
-      categories: categories,
-      shops: shops
-    }
-    render_json(response, 200)
+    render_json(
+      {
+        products: products,
+        categories: categories,
+        shops: shops
+      }
+    )
   end
+
+  private
 
   def products
     Category.includes(products: [prices: :shop]).limit(3).map do |category|

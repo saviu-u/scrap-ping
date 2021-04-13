@@ -1,4 +1,12 @@
 class Tag < ApplicationRecord
+  extend FriendlyId
+  friendly_id :title, use: :slugged
+
+  TAGS_BLACKLIST = %w[
+    modelo numero-da-peca pecas-para-montagem numero-do-modelo ean codigo codigo-de-barras
+    referencia-do-modelo conteudo-da-embalagem recursos-de-videos recursos-de-audio outras-conexoes
+  ].freeze
+
   has_many :product_tags
   has_many :products, through: :product_tags
   has_many :product_tags
@@ -12,6 +20,13 @@ class Tag < ApplicationRecord
 
     select(select_clause.join(', ')).joins('LEFT OUTER JOIN tags tag2 ON tags.tag_id = tag2.id')
   }
+
+  def to_search
+    {
+      label: title,
+      id: slug
+    }
+  end
 
   def fixing_tags
     update_to_sub_tag(self)
