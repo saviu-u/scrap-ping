@@ -4,7 +4,7 @@ class Category < ApplicationRecord
 
   has_many :products
 
-  def to_show
+  def to_index
     {
       title: title,
       id: slug
@@ -12,6 +12,6 @@ class Category < ApplicationRecord
   end
 
   def retrieve_products(limit = 5)
-    products[0..limit-1].map(&:to_show)
+    products.select{ |product| product.prices.any?(&:active) }[0..limit-1].map(&:to_index)
   end
 end

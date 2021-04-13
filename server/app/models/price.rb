@@ -9,4 +9,12 @@ class Price < ApplicationRecord
   def price_update
     shop.spider.new.update(id_integration, self)
   end
+
+  def to_show
+    {
+      price: price,
+      price_shop: shop&.to_show,
+      price_link: link
+    }
+  end
 end

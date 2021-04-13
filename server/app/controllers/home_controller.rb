@@ -18,7 +18,7 @@ class HomeController < ApplicationController
   end
 
   def categories
-    Category.all.map(&:to_show)
+    Category.all.map(&:to_index)
   end
 
   def shops

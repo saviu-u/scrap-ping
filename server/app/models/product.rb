@@ -19,6 +19,8 @@ class Product < ApplicationRecord
 
   after_commit :search_shops
 
+  # Scopes
+
   scope :for_search, lambda { |term, tag_search = nil|
     # Standard search
     result = joins(:category, :prices, product_tags: :tag)
@@ -49,16 +51,27 @@ class Product < ApplicationRecord
     joins(:prices).where(prices: { active: true }).pluck('min(prices.price), max(prices.price)')
   }
 
-  def to_show
+  # Show methods
+
+  def to_index
     best_price = prices.select(&:active).min_by(&:price)
     {
       id: slug,
       title: title,
-      best_price: best_price&.price,
-      best_price_shop: best_price&.shop&.to_show,
-      best_price_link: best_price&.link
+      **best_price&.to_show&.transform_keys! { |key| 'best_'.concat(key.to_s).to_sym }
     }
   end
+
+  def to_show
+    {
+      title: title,
+      image_path: image_path,
+      prices: prices.select(&:active).map(&:to_show),
+      tags: product_tags.includes(:tag).map(&:to_show)
+    }
+  end
+
+  # Data methods
 
   def fetch_data(data, spider)
     # Set variables

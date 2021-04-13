@@ -2,7 +2,7 @@ class SearchController < ApplicationController
   def search
     render_json(
       {
-        products: paginate.map(&:to_show),
+        products: paginate.map(&:to_index),
         tags: search_resources.fancy_tags,
         fixed_price: search_resources.price_range
       }.merge(metadata: metadata)
