@@ -6,7 +6,11 @@ module Spider
           path: 'gp/most-wished-for/',
           lambda_dict: {
             id_integration: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:category][:css_query][:id_integration]).attributes['href'].value)
+              begin
+                id_polish(noko.at_css(uri_config[:category][:css_query][:id_integration]).attributes['href']&.value)
+              rescue StandardError
+                raise NO_ID_EXCEPTION
+              end
             end,
             title: ->(noko) { noko.at_css(uri_config[:category][:css_query][:title]).text.strip },
             price: lambda do |noko|

@@ -5,6 +5,7 @@ module Spider
   class SpiderBase
     attr_accessor :category, :search, :category_title
 
+    NO_ID_EXCEPTION = 'NO_ID_EXCEPTION'.freeze
     NO_PRICE_EXCEPTION = 'NO_PRICE_EXCEPTION'.freeze
 
     def initialize(product = nil, category_title: nil)
@@ -41,7 +42,7 @@ module Spider
           result.merge!(category: category_title || search)
           memo << result
         rescue StandardError => e
-          raise e unless e.to_s == NO_PRICE_EXCEPTION
+          raise e unless e.to_s.in? [NO_PRICE_EXCEPTION, NO_ID_EXCEPTION]
         end
       end
     rescue OpenURI::HTTPError
@@ -70,7 +71,7 @@ module Spider
       raise e unless e.to_s == NO_PRICE_EXCEPTION
     end
 
-    private
+    # private
 
     def search_type
       category ? :category : :search
