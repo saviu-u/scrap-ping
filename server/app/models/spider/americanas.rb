@@ -24,7 +24,7 @@ module Spider
           path: 'busca/',
           lambda_dict: {
             id_integration: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:search][:css_query][:id_integration]).attributes['to'].value)
+              id_polish(noko.at_css(uri_config[:search][:css_query][:id_integration]).attributes['href'].value)
             end,
             title: ->(noko) { noko.at_css(uri_config[:search][:css_query][:title]).text },
             price: lambda do |noko|
