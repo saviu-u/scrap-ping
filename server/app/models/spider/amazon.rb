@@ -28,7 +28,11 @@ module Spider
           path: 's?k=',
           lambda_dict: {
             id_integration: lambda do |noko|
-              id_polish(noko.at_css(uri_config[:search][:css_query][:id_integration]).attributes['href'].value)
+              begin
+                id_polish(noko.at_css(uri_config[:search][:css_query][:id_integration]).attributes['href'].value)
+              rescue StandardError
+                raise NO_ID_EXCEPTION
+              end
             end,
             title: ->(noko) { noko.at_css(uri_config[:search][:css_query][:title]).text },
             price: lambda do |noko|
