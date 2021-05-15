@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  before_action :allow_ajax_request_from_other_domains
+
   LIMIT = 12
 
   def render_json(data, status = :ok)
@@ -25,5 +27,12 @@ class ApplicationController < ActionController::Base
 
   def resources
     raise 'Define a resource'
+  end
+
+  def allow_ajax_request_from_other_domains
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Allow-Methods'] = 'POST, PUT, DELETE, GET, OPTIONS'
+    headers['Access-Control-Request-Method'] = '*'
+    headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
   end
 end
