@@ -17,7 +17,7 @@ if [ -z "${ENVIRONMENT}" ]; then
     chmod +xr bin/delayed_job
 
     echo "> Start jobs"
-    RAILS_ENV=development bin/delayed_job start
+    RAILS_ENV=development bin/delayed_job restart
 
     echo "> Caching"
     bundle exec rake cache:fetch

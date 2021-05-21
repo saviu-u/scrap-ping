@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   root to: 'home#index'
 
   get '/search/:search', to: 'search#search'
+  get '/category/:search', to: 'category#search'
   get '/search', to: 'search#search'
 
   resources :products, only: :show

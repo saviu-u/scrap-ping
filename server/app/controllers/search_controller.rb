@@ -12,7 +12,7 @@ class SearchController < ApplicationController
   private
 
   def load_search
-    @load_search = params.permit(:search)[:search]
+    @load_search ||= params.permit(:search)[:search]
   end
 
   def search_resources

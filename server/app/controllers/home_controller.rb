@@ -4,7 +4,8 @@ class HomeController < ApplicationController
       {
         products: products,
         categories: categories,
-        shops: shops
+        shops: shops,
+        jobs_running: jobs_hash
       }
     )
   end
@@ -23,5 +24,17 @@ class HomeController < ApplicationController
 
   def shops
     Shop.all.map(&:to_index)
+  end
+
+  def jobs_hash
+    active = total = errors = 0
+
+    Delayed::Job.all.each do |dj|
+      active += 1 if dj.locked_at
+      errors += 1 if dj.last_error
+      total += 1
+    end
+
+    { active: active, errors: errors, total: total }
   end
 end

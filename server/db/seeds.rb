@@ -15,7 +15,9 @@ existing_shops = Shop.pluck(:spider_name).map { |class_name| class_name.demoduli
 end
 
 if Delayed::Job.count.zero?
-  Shop.all.each { |shop| shop.spider.new('tv').import }
+  %w[tv notebook microondas].each do |product|
+    Shop.all.each { |shop| shop.spider.new(product).import }
+  end
 end
 
 # last_price = Price.all.min(&:updated_at)

@@ -3,6 +3,7 @@ class FetchProductJob < ApplicationJob
 
   def perform(data, spider, id = nil)
     (Product.find_by(id: id) || Product.new).fetch_data(data, spider.new)&.save!
+    sleep(rand(4..6))
   end
 
   def reschedule_at(current_time, attempts)
