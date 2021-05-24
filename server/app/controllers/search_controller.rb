@@ -19,7 +19,7 @@ class SearchController < ApplicationController
     return Product.none unless load_search
     return @search_resources if @search_resources
 
-    @search_resources = Product.joins(:prices, :category).includes(prices: :shop)
+    @search_resources = Product.joins(:prices, :category).includes(:category, prices: :shop)
   end
 
   def resources

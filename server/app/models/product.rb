@@ -58,6 +58,7 @@ class Product < ApplicationRecord
     {
       id: slug,
       title: title,
+      category: category.to_index,
       **best_price&.to_show&.transform_keys! { |key| 'best_'.concat(key.to_s).to_sym }
     }
   end
@@ -66,6 +67,7 @@ class Product < ApplicationRecord
     {
       title: title,
       image_path: image_path,
+      category: category.to_index,
       prices: prices.select(&:active).map(&:to_show),
       tags: product_tags.includes(:tag).map(&:to_show)
     }

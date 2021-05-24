@@ -13,7 +13,7 @@ class HomeController < ApplicationController
   private
 
   def products
-    Category.includes(products: [prices: :shop]).limit(3).map do |category|
+    Category.includes(products: [:category, prices: :shop]).limit(3).map do |category|
       { category.title => category.retrieve_products }
     end
   end
